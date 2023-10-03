@@ -81,7 +81,7 @@ GO(SDL_CreateTexture, pFpuiii)
 GO(SDL_CreateTextureFromSurface, pFpp)
 GOM(SDL_CreateThread, pFEppp)
 // SDL_CreateThreadWithStackSize
-GO(SDL_CreateWindow, pFpiiiiu)
+GOM(SDL_CreateWindow, pFpiiiiu)
 GO(SDL_CreateWindowAndRenderer, iFiiupp)
 GO(SDL_CreateWindowFrom, pFp)
 GO(SDL_Delay, vFu)
