@@ -1,7 +1,8 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#define _GNU_SOURCE         /* See feature_test_macros(7) */
+#include <string.h>        /* See feature_test_macros(7) */
+#include <ctype.h>
 #include <dlfcn.h>
 #include <stdarg.h>
 
@@ -591,9 +592,6 @@ int EXPORT my2_SDL_DYNAPI_entry(x64emu_t* emu, uint32_t version, uintptr_t *tabl
 
 EXPORT void *my2_SDL_CreateWindow(x64emu_t* emu, const char *title, int x, int y, int w, int h, uint32_t flags)
 {
-    sdl2_my_t *my = (sdl2_my_t *)emu->context->sdl2lib->priv.w.p2;
-    void *win = NULL;
-
     // Set BOX64_FORCE_ES=MN or BOX64_FORCE_ES=M to force a specific OpenGL ES version.
     // M = major version, N = minor version
     const char *force_es = getenv("BOX64_FORCE_ES");
@@ -606,27 +604,25 @@ EXPORT void *my2_SDL_CreateWindow(x64emu_t* emu, const char *title, int x, int y
         #define SDL_GL_CONTEXT_MINOR_VERSION 18
         #define SDL_WINDOW_OPENGL 2
         #define SDL_WINDOW_VULKAN 268435456
+        
         // Is BOX64_FORCE_ES incorrectly formatted?
         if (!isdigit(force_es[0]) || (force_es[1] != '\0' && !isdigit(force_es[1]))) {
             printf_log(LOG_NONE, "Warning: ignoring malformed BOX64_FORCE_ES.\n");
         } else {
-            int (*SDL_GL_SetAttribute_p)(uint32_t, int) = dlsym(emu->context->sdl2lib->priv.w.lib, "SDL_GL_SetAttribute");
+            int (*SDL_GL_SetAttribute_p)(uint32_t, int) = dlsym(emu->context->sdl2lib->w.lib, "SDL_GL_SetAttribute");
             SDL_GL_SetAttribute_p(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
             SDL_GL_SetAttribute_p(SDL_GL_CONTEXT_MAJOR_VERSION, force_es[0] - '0');
             SDL_GL_SetAttribute_p(SDL_GL_CONTEXT_MINOR_VERSION, force_es[1] ? (force_es[1] - '0') : 0);
         }
-        if(force_vulkan) {
-            if(strlen(force_vulkan)==1) {
-                if(force_vulkan[0]==1) {
-                    flags |= SDL_WINDOW_VULKAN;
-                }
-            }
-        } else {
+        if(!isdigit(force_vulkan[0]) || strlen(force_vulkan)!=1 || force_vulkan[0]!=1) {
             flags |= SDL_WINDOW_OPENGL;
+        } else {
+            printf_log(LOG_NONE, "Forcing Vulkan window.\n");
+            flags |= SDL_WINDOW_VULKAN;
         }
     }
 
-    return my->SDL_CreateWindow(title, x, y, w, h, flags);
+    return my->SDL_CreateWindow((void*)title, x, y, w, h, flags);
 }
 
 char EXPORT *my2_SDL_GetBasePath(x64emu_t* emu) {
