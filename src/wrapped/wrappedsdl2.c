@@ -600,6 +600,7 @@ EXPORT void *my2_SDL_CreateWindow(x64emu_t* emu, const char *title, int x, int y
     if (force_es && *force_es && (force_es[0] != '0')) {
         #define SDL_GL_CONTEXT_PROFILE_MASK 21
         #define SDL_GL_CONTEXT_PROFILE_ES 4
+        #define SDL_GL_CONTEXT_PROFILE_CORE 1
         #define SDL_GL_CONTEXT_MAJOR_VERSION 17
         #define SDL_GL_CONTEXT_MINOR_VERSION 18
         #define SDL_WINDOW_OPENGL 2
@@ -610,7 +611,7 @@ EXPORT void *my2_SDL_CreateWindow(x64emu_t* emu, const char *title, int x, int y
             printf_log(LOG_NONE, "Warning: ignoring malformed BOX64_FORCE_ES.\n");
         } else {
             int (*SDL_GL_SetAttribute_p)(uint32_t, int) = dlsym(emu->context->sdl2lib->w.lib, "SDL_GL_SetAttribute");
-            SDL_GL_SetAttribute_p(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+            SDL_GL_SetAttribute_p(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
             SDL_GL_SetAttribute_p(SDL_GL_CONTEXT_MAJOR_VERSION, force_es[0] - '0');
             SDL_GL_SetAttribute_p(SDL_GL_CONTEXT_MINOR_VERSION, force_es[1] ? (force_es[1] - '0') : 0);
         }
